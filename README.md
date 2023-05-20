@@ -1,45 +1,42 @@
-# Relatório: O Problema do Jantar dos Filósofos
+# Relatório: Problema do Jantar dos Filósofos
 
 ## Introdução
 
-O Problema do Jantar dos Filósofos é um clássico problema de sincronização em sistemas operacionais e concorrência. Ele descreve uma situação em que um grupo de filósofos está sentado em uma mesa redonda, onde cada filósofo alterna entre pensar e comer. Entre cada par de filósofos, há um garfo compartilhado. O objetivo é evitar que ocorram deadlocks (interbloqueios) e starvation (inanição) durante o jantar.
+O problema do jantar dos filósofos é um problema clássico de sincronização em ciência da computação, proposto por Edsger Dijkstra em 1965. Ele descreve cinco filósofos sentados em uma mesa circular, onde cada filósofo tem um prato de espaguete e um garfo à sua esquerda e à sua direita. Os filósofos podem alternar entre dois estados: pensar e comer. Para comer, um filósofo precisa pegar os dois garfos adjacentes. O problema consiste em encontrar uma solução que permita que todos os filósofos comam sem entrar em impasse (deadlock) ou passar fome (starvation).
 
 ## Lógica do Código
 
-O código implementado em C aborda o Problema do Jantar dos Filósofos utilizando threads e mutexes para sincronizar as ações dos filósofos. Aqui está uma explicação da lógica do código:
+O código utiliza a biblioteca `pthread` para criar uma thread para cada filósofo. Cada filósofo é representado por uma estrutura que contém seu identificador e estado atual (pensar, fome ou comer). Um mutex é usado para controlar o acesso aos recursos compartilhados (garfos), e uma condição é associada a cada filósofo para sinalizar quando ele pode comer.
 
-1. Definição das constantes e das estruturas de dados: São definidos o número de filósofos (N) e os estados possíveis de um filósofo (PENSAR, FOME e COMER). Também é definida a estrutura `Filosofo` que contém o identificador do filósofo e o seu estado.
+A função `filosofo` é a função principal executada por cada thread de filósofo. Ela faz com que o filósofo pense por um tempo, tente pegar os garfos, coma e depois devolva os garfos. As funções `agarraGarfo` e `deixaGarfo` são responsáveis por controlar o acesso aos garfos e atualizar o estado dos filósofos.
 
-2. Declaração das variáveis globais: São declaradas as variáveis globais `filosofos` (um array de `Filosofo`), `mutex` (um mutex para controlar o acesso à região crítica) e `cond` (um array de variáveis de condição para sincronizar os filósofos).
+A função `testar` é usada para verificar se um filósofo pode comer. Um filósofo pode comer se estiver com fome e seus vizinhos não estiverem comendo. Se um filósofo pode comer, seu estado é atualizado para comer, e a condição associada a ele é sinalizada.
 
-3. Implementação das funções `filosofo`, `agarraGarfo`, `deixaGarfo` e `testar`:
-   - `filosofo`: É a função executada por cada thread de filósofo. Ela entra em um loop infinito onde o filósofo alterna entre pensar, agarrar garfos e deixar garfos.
-   - `agarraGarfo`: O filósofo tenta agarrar os garfos. Se não conseguir, ele aguarda até que possa comer.
-   - `deixaGarfo`: O filósofo deixa os garfos após comer, e notifica os filósofos vizinhos para que possam tentar agarrar os garfos.
-   - `testar`: Verifica se o filósofo pode comer (se ele está com fome e os vizinhos não estão comendo). Se sim, o filósofo come.
+### Solução para Deadlocks e Starvation
 
-4. Função `main`: É a função principal do programa. Ela inicializa as variáveis, cria as threads para os filósofos e aguarda a finalização das threads.
-
-## Solução de Deadlocks e Starvation
-
-O código implementado apresenta soluções para evitar deadlocks e starvation:
-
-1. Utilização de mutex: O mutex `mutex` é usado para garantir que apenas um filósofo por vez possa acessar a região crítica (os garfos). Isso evita que dois filósofos peguem o mesmo garfo ao mesmo tempo.
-
-2. Uso de variáveis de condição: As variáveis de condição `cond` são usadas para sincronizar os filósofos e permitir que eles esperem quando não conseguem agarrar os garfos. Essas variáveis são notificadas quando os garfos são deixados pelos filósofos vizinhos.
-
-3. Ordem de aquisição dos garfos:
-
- Para evitar o deadlock, foi definida uma ordem fixa para a aquisição dos garfos. Cada filósofo sempre pega primeiro o garfo da sua esquerda e depois o garfo da sua direita. Essa ordem é importante para prevenir o deadlock em situações onde todos os filósofos tentam pegar o garfo da sua direita ao mesmo tempo.
-
-4. Liberação dos garfos: Para evitar a inanição (starvation), um filósofo só deixa os garfos após comer, o que garante que todos os filósofos terão a oportunidade de comer.
+A solução para evitar deadlocks e starvation é garantir que um filósofo só possa comer se ambos os vizinhos não estiverem comendo. Isso é feito na função `testar`. Além disso, quando um filósofo termina de comer e devolve os garfos, a função `deixaGarfo` testa se os vizinhos podem comer, garantindo que eles não passem fome.
 
 ## Resultados
 
-O código implementado demonstrou uma solução funcional para o Problema do Jantar dos Filósofos, evitando deadlocks e starvation. Durante a execução, cada filósofo alterna entre os estados de pensar, ter fome, comer e deixar os garfos.
+O programa funciona corretamente, permitindo que todos os filósofos comam sem entrar em impasse ou passar fome. A saída do programa mostra o estado de cada filósofo e as ações realizadas (pegar garfos, comer e devolver garfos).
 
-Os resultados podem variar dependendo do ambiente de execução, como o sistema operacional e a capacidade de processamento. No entanto, a solução implementada garante que todos os filósofos tenham a oportunidade de comer e evita situações em que um filósofo fique indefinidamente faminto ou bloqueado.
+## Problemas Enfrentados
 
-É importante destacar que, mesmo com a implementação correta, podem ocorrer situações de contenção em que os filósofos precisam esperar por um garfo. Essa contenção pode resultar em um desempenho menor em termos de tempo de resposta e utilização de recursos.
+Os principais desafios ao implementar a solução foram:
 
-Em resumo, o código soluciona o Problema do Jantar dos Filósofos usando mutexes e variáveis de condição para garantir a sincronização correta entre os filósofos, evitando deadlocks e starvation.
+1. Garantir que os filósofos não entrem em deadlock ao tentar pegar os garfos simultaneamente.
+2. Evitar que os filósofos passem fome, garantindo que todos tenham a chance de comer.
+3. Sincronizar o acesso aos recursos compartilhados (garfos) usando mutex e condições.
+
+
+# Orientações para compilação e execução do código
+
+## Compilação
+Para compilar o código abra no terminal o diretorio que contenha o arquivo do código, e executo o seguinte comando:
+
+```gcc -o jantar_dos_filosofos jantar_dos_filosofos.c -lpthread```
+
+## Execução
+Para execução ainda no mesmo diretório digite o seguinte comando no terminal:
+
+```./jantar_dos_filosofos```

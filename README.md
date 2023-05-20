@@ -34,9 +34,13 @@ Os principais desafios ao implementar a solução foram:
 ## Compilação
 Para compilar o código abra no terminal o diretorio que contenha o arquivo do código, e executo o seguinte comando:
 
-```gcc -o jantar_dos_filosofos jantar_dos_filosofos.c -lpthread```
+```
+gcc -o jantar_dos_filosofos jantar_dos_filosofos.c -lpthread
+```
 
 ## Execução
 Para execução ainda no mesmo diretório digite o seguinte comando no terminal:
 
-```./jantar_dos_filosofos```
+```
+./jantar_dos_filosofos
+```
